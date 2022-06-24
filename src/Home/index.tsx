@@ -7,7 +7,7 @@ function getRandomChar() {
   return res;
 }
 
-const TargetLength = 5;
+const TargetLength = 20;
 
 function Index() {
   const timerRef = useRef();
