@@ -7,14 +7,14 @@ function getRandomChar() {
   return res;
 }
 
-const TargetLength = 10;
+const TargetLength = 5;
 
 function Index() {
   const timerRef = useRef();
   const inputRef = useRef<any>(null);
 
   const [milliSeconds, setMilliSeconds] = useState(0);
-  const [timerActive, setTimerActive] = useState<boolean>(false);
+  const [penalty, setPenalty] = useState<boolean>(false);
 
   const [bestScore, setBestScore] = useState(
     localStorage.getItem('bestScore') || 0
@@ -44,8 +44,6 @@ function Index() {
         return s + 100;
       });
     }, 100) as any;
-
-    setTimerActive(true);
   };
 
   // Remove timer
@@ -68,28 +66,39 @@ function Index() {
   // Reset running timer to zero
   const resetTimer = () => {
     if (timerRef.current) {
-      setTimerActive(false);
       setMilliSeconds(0);
       setResponse('');
       setRandomChar();
+      setBestScore(localStorage.getItem('bestScore') || 0);
       inputRef.current.focus();
     }
+  };
+
+  const handlePenalty = () => {
+    setPenalty(true);
+    setMilliSeconds(s => s + 500);
+    setTimeout(() => {
+      setPenalty(false);
+    }, 500);
   };
 
   // Function to handle success
   const handleSuccess = () => {
     clearTimer();
-    setCurrentAlphabet('Success');
 
     // Updating the best time in local storage
     const bestTime = localStorage.getItem('bestScore');
     if (bestTime) {
       if (milliSeconds < Number(bestTime)) {
+        setCurrentAlphabet('Success!');
         localStorage.setItem('bestScore', String(milliSeconds));
-        setBestScore(milliSeconds);
+      } else {
+        setCurrentAlphabet('Failure');
       }
     } else {
+      setCurrentAlphabet('Success');
       localStorage.setItem('bestScore', String(milliSeconds));
+      setBestScore(milliSeconds);
     }
   };
 
@@ -97,19 +106,24 @@ function Index() {
     let val: string = e.target.value;
     const char = val.charAt(val.length - 1);
 
-    console.log(val, char);
     if (val.length === 1) {
       startTimer();
     }
 
-    setResponse(val.toUpperCase());
+    if (val.length <= TargetLength) {
+      if (char.toUpperCase() === currentAlphabet) {
+        setResponse(val.toUpperCase());
+        setRandomChar();
+      } else {
+        handlePenalty();
+      }
+    }
     if (val.length >= TargetLength) {
       handleSuccess();
-    } else if (char.toUpperCase() === currentAlphabet) {
-      setRandomChar();
     }
   };
 
+  // console.log(bestScore, ' best score');
   return (
     <div
       style={{minHeight: 'calc(100vh - 50px)'}}
@@ -128,7 +142,10 @@ function Index() {
           Timer : {Number(milliSeconds / 1000).toFixed(1)} sec
         </div>
         {bestScore && bestScore != 0 ? (
-          <p className="my-4">My best time: {Number(bestScore) / 1000} sec!</p>
+          <div className="my-4">
+            My best time: {Number(bestScore) / 1000} sec!{' '}
+            {/* {penalty && <span> + 0.5 </span>} */}
+          </div>
         ) : (
           ''
         )}
@@ -137,6 +154,7 @@ function Index() {
       <div className="flex">
         <input
           ref={inputRef}
+          name="random_text"
           value={response}
           onChange={handleInput}
           onKeyDown={e => {
