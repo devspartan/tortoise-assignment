@@ -138,13 +138,21 @@ function Index() {
 
         <Canvas currentAlphabet={currentAlphabet} />
 
-        <div className="mt-8">
-          Timer : {Number(milliSeconds / 1000).toFixed(1)} sec
+        <div className="mt-8 flex justify-center">
+          <div className="w-2/4 text-right">Timer : </div>
+          <div className="w-2/4 text-left">
+            &nbsp;
+            {Number(milliSeconds / 1000).toFixed(1)} sec &nbsp;
+            {penalty && <span> + 0.5 sec penalty </span>}
+          </div>
         </div>
         {bestScore && bestScore != 0 ? (
-          <div className="my-4">
-            My best time: {Number(bestScore) / 1000} sec!{' '}
-            {/* {penalty && <span> + 0.5 </span>} */}
+          <div className="my-4 flex justify-center">
+            <div className="w-2/4 text-right">My best time : </div>
+            <div className="w-2/4 text-left">
+              &nbsp;
+              {Number(bestScore) / 1000} sec!{' '}
+            </div>
           </div>
         ) : (
           ''
