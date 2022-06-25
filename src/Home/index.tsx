@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
-import Canvas from './canvas';
+import Screen from './screen';
 
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 function getRandomChar() {
@@ -26,7 +26,7 @@ function Index() {
   );
 
   useEffect(() => {
-    if (inputRef) {
+    if (inputRef.current) {
       inputRef.current.focus();
     }
     return () => {
@@ -88,7 +88,7 @@ function Index() {
 
     // Updating the best time in local storage
     const bestTime = localStorage.getItem('bestScore');
-    if (bestTime) {
+    if (bestTime && bestTime != '0') {
       if (milliSeconds < Number(bestTime)) {
         setCurrentAlphabet('Success!');
         localStorage.setItem('bestScore', String(milliSeconds));
@@ -103,14 +103,15 @@ function Index() {
   };
 
   const handleInput = (e: any) => {
-    let val: string = e.target.value;
+    //  const result = e.target.value.;
+    let val: string = e.target.value.replace(/[^a-z]/gi, '');
     const char = val.charAt(val.length - 1);
 
     if (val.length === 1) {
       startTimer();
     }
 
-    if (val.length <= TargetLength) {
+    if (char && val.length <= TargetLength) {
       if (char.toUpperCase() === currentAlphabet) {
         setResponse(val.toUpperCase());
         setRandomChar();
@@ -123,7 +124,13 @@ function Index() {
     }
   };
 
-  // console.log(bestScore, ' best score');
+  let textClassName = 'text-gray-600';
+  if (currentAlphabet === 'Success!') {
+    textClassName = 'text-primary-green';
+  } else if (currentAlphabet === 'Failure') {
+    textClassName = 'text-primary-pink';
+  }
+
   return (
     <div
       style={{minHeight: 'calc(100vh - 50px)'}}
@@ -136,7 +143,7 @@ function Index() {
           Typing game to see how fast you type. Timer starts when you do :)
         </p>
 
-        <Canvas currentAlphabet={currentAlphabet} />
+        <Screen displayText={currentAlphabet} textClassName={textClassName} />
 
         <div className="mt-8 flex justify-center">
           <div className="w-2/4 text-right">Timer : </div>
@@ -162,7 +169,9 @@ function Index() {
       <div className="flex">
         <input
           ref={inputRef}
-          name="random_text"
+          autoFocus={true}
+          autoComplete="false"
+          type="text"
           value={response}
           onChange={handleInput}
           onKeyDown={e => {
